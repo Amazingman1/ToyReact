@@ -8,10 +8,14 @@ class ElementWrapper {
         this.root.setAttribute(name, value)
     }
     appendChild(component) {
-        this.root.appendChild(component.root)
+        let range = document.createRange()
+        range.setStart(this.root, this.root.childNodes.length)
+        range.setEnd(this.root, this.root.childNodes.length)
+        component[RENDER_TO_DOM](range)
     }
     [RENDER_TO_DOM](range) {
-        this.render().[RENDER_TO_DOM](range)
+        range.deleteContents()
+        range.insertNode(this.root)
     }
 }
 
@@ -20,19 +24,20 @@ class TextWrapper {
         this.root = document.createTextNode(content)
     }
     [RENDER_TO_DOM](range) {
-        this.render().[RENDER_TO_DOM](range)
+        range.deleteContents()
+        range.insertNode(this.root)
     }
 }
 export class Component {
     constructor() {
         this.props = Object.create(null)
         this.children = []
+        this._root = null
     }
     setAttribute(name, value) {
         this.props[name] = value
     }
     appendChild(component) {
-        console.log(component, 999)
         this.children.push(component)
     }
     [RENDER_TO_DOM](range) {
@@ -54,7 +59,7 @@ export function createElement(type, attributes, ...children) {
     let insertChildren = (children) => {
         for (let child of children) {
             if(typeof child === 'string') {
-                child =new TextWrapper(child)
+                child = new TextWrapper(child)
             }
             if (typeof child === 'object' && child instanceof Array) {
                 insertChildren(child)
@@ -69,10 +74,10 @@ export function createElement(type, attributes, ...children) {
 }
 
 export function render(component, parentElement) {
+    console.log(parentElement, 111)
     let range = document.createRange()
     range.setStart(parentElement, 0)
     range.setEnd(parentElement, parentElement.childNodes.length)
     range.deleteContents()
-    component.render()[RENDER_TO_DOM](range)
-
+    component[RENDER_TO_DOM](range)
 }

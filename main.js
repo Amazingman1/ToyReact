@@ -5,14 +5,14 @@ class MyComponent extends Component {
     constructor() {
         super()
         this.state = {
-            a: '1'
+            a: 1
         }
     }
     render() {
         return <div>
             <h1>第一个组件</h1>
-            {this.state.a}
-            {this.children}
+            <button onClick={() => { this.setState({a: this.state.a + 1}) }}>add</button>
+            {this.state.a.toString()}
         </div>
     }
 }

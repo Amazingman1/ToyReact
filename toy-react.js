@@ -5,7 +5,12 @@ class ElementWrapper {
         this.root = document.createElement(type)
     }
     setAttribute(name, value) {
-        this.root.setAttribute(name, value)
+        // L拦截on 事件 [\s\S] 所有集合
+        if(name.match(/^on([\s\S]+)$/)) {
+            this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLowerCase()), value)
+        } else {
+            this.root.setAttribute(name, value)
+        }
     }
     appendChild(component) {
         let range = document.createRange()
@@ -33,6 +38,7 @@ export class Component {
         this.props = Object.create(null)
         this.children = []
         this._root = null
+        this._range = null
     }
     setAttribute(name, value) {
         this.props[name] = value
@@ -41,7 +47,32 @@ export class Component {
         this.children.push(component)
     }
     [RENDER_TO_DOM](range) {
+        this._range = range
         this.render()[RENDER_TO_DOM](range)
+    }
+    // 重新渲染页面 
+    rerender(){
+       this._range.deleteContents()
+        this[RENDER_TO_DOM](this._range)
+    }
+    // 重置 state
+    setState(newState) {
+        if(this.state === null || typeof this.state !== 'object' ) {
+            this.state = newState
+            this.rerender()
+            return
+        }
+        let merge = (oldState, newState) => {
+            for(let p in newState) {
+                if(oldState[p] === null || typeof oldState[p] !== 'object') {
+                    oldState[p] = newState[p]
+                } else {
+                    merge(oldState[p], newState[p])
+                }
+            }
+        }
+        merge(this.state, newState)
+        this.rerender()
     }
 }
 

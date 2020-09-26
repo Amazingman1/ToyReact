@@ -7,3 +7,10 @@ npm install
 
 webpack
 ```
+
+### 2. 笔记
+```
+    // ElementWrapper
+    // TextWrapper
+    // Component
+```
